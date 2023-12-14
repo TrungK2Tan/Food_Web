@@ -980,7 +980,6 @@ namespace Food_Web.Models
             double? totalpriceinvoucher = Session["TotalPriceAfterDiscount"] as double?;
             double originalAmount = 0;
 
-
             int newOrderNo = context.Orders.Max(o => (int?)o.Od_id) ?? 0;
             newOrderNo++;
 
@@ -995,11 +994,13 @@ namespace Food_Web.Models
                 idthanhtoan = 1
             };
 
+
             context.Orders.Add(objOrder);
             string oderid = newOrderNo.ToString();
 
             List<listOrder> listOrders = getListOrder();
 
+            double? tt_money = 0;
             foreach (var order in listOrders)
             {
                 var cart = context.CartItems.SingleOrDefault(x => x.Id == order.ID);
@@ -1015,6 +1016,7 @@ namespace Food_Web.Models
                             // Redirect to some action to handle the error and display the message
                             return RedirectToAction("HandleError");
                         }
+
                         // Tạo chi tiết đơn hàng và lưu vào cơ sở dữ liệu
                         Order_detail ctdh = new Order_detail()
                         {
@@ -1027,6 +1029,7 @@ namespace Food_Web.Models
                             VoucherCode = voucherCode,
                             Totalinvoucher = totalpriceinvoucher
                         };
+
                         if (voucherCode != null && totalpriceinvoucher.HasValue && voucherCode == ctdh.VoucherCode && totalpriceinvoucher == ctdh.Totalinvoucher)
                         {
                             var discount = context.Discounts.SingleOrDefault(x => x.Code == voucherCode);
@@ -1040,38 +1043,34 @@ namespace Food_Web.Models
                                 string code = " Voucher không tồn tại hoặc hết hạn";
                             }
                         }
-                        //context.Order_detail.Add(ctdh);
-                        //orderDetails.Add(ctdh);
-
-                        double? tt_money = ctdh.tt_money;
-                        originalAmount += tt_money ?? 0;
-
 
                         // Trừ đi số lượng đã mua từ sản phẩm
                         if (product != null)
                         {
                             product.Soluong -= cart.Quantity; // Giả sử Soluong là số lượng sản phẩm
-                            //context.SaveChanges(); // Lưu thay đổi số lượng vào cơ sở dữ liệu
+                                                              //context.SaveChanges(); // Lưu thay đổi số lượng vào cơ sở dữ liệu
                         }
 
                         context.CartItems.Remove(cart);
                         // context.SaveChanges();
 
+                        // Add to the total amount
+                        tt_money += ctdh.tt_money;
                     }
                 }
             }
-            string displayAmount = (originalAmount * 100).ToString();
             string url = ConfigurationManager.AppSettings["vnp_Url"];
             string returnUrl = ConfigurationManager.AppSettings["ReturnUrl"];
             string tmnCode = ConfigurationManager.AppSettings["vnp_TmnCode"];
             string hashSecret = ConfigurationManager.AppSettings["vnp_HashSecret"];
-
-            PayLib pay = new PayLib();
+            string amount = (tt_money * 100).ToString();
+            string orderid = newOrderNo + ""; //mã đơn hàng
+            PayLib pay = new PayLib();  
 
             pay.AddRequestData("vnp_Version", "2.1.0"); //Phiên bản api mà merchant kết nối. Phiên bản hiện tại là 2.1.0
             pay.AddRequestData("vnp_Command", "pay"); //Mã API sử dụng, mã cho giao dịch thanh toán là 'pay'
             pay.AddRequestData("vnp_TmnCode", tmnCode); //Mã website của merchant trên hệ thống của VNPAY (khi đăng ký tài khoản sẽ có trong mail VNPAY gửi về)
-            pay.AddRequestData("vnp_Amount", displayAmount); // Sử dụng trực tiếp giá trị `Gia`+//số tiền cần thanh toán, công thức: số tiền * 100 - ví dụ 10.000 (mười nghìn đồng) --> 1000000
+            pay.AddRequestData("vnp_Amount", amount); //số tiền cần thanh toán, công thức: số tiền * 100 - ví dụ 10.000 (mười nghìn đồng) --> 1000000
             pay.AddRequestData("vnp_BankCode", ""); //Mã Ngân hàng thanh toán (tham khảo: https://sandbox.vnpayment.vn/apis/danh-sach-ngan-hang/), có thể để trống, người dùng có thể chọn trên cổng thanh toán VNPAY
             pay.AddRequestData("vnp_CreateDate", DateTime.Now.ToString("yyyyMMddHHmmss")); //ngày thanh toán theo định dạng yyyyMMddHHmmss
             pay.AddRequestData("vnp_CurrCode", "VND"); //Đơn vị tiền tệ sử dụng thanh toán. Hiện tại chỉ hỗ trợ VND
@@ -1080,130 +1079,78 @@ namespace Food_Web.Models
             pay.AddRequestData("vnp_OrderInfo", "Thanh toan don hang"); //Thông tin mô tả nội dung thanh toán
             pay.AddRequestData("vnp_OrderType", "other"); //topup: Nạp tiền điện thoại - billpayment: Thanh toán hóa đơn - fashion: Thời trang - other: Thanh toán trực tuyến
             pay.AddRequestData("vnp_ReturnUrl", returnUrl); //URL thông báo kết quả giao dịch khi Khách hàng kết thúc thanh toán
-            pay.AddRequestData("vnp_TxnRef", oderid); //mã hóa đơn
+            pay.AddRequestData("vnp_TxnRef", orderid); //mã hóa đơn
 
             string paymentUrl = pay.CreateRequestUrl(url, hashSecret);
 
-            db.SaveChanges();
             return Redirect(paymentUrl);
         }
 
-        public ActionResult PaymentVNPayConfirm(Result result)
+        public ActionResult PaymentVNPayConfirm()
         {
-            if (result != null && result.errorCode == "0")
+            if (Request.QueryString.Count > 0)
             {
-                try
+                string hashSecret = ConfigurationManager.AppSettings["vnp_HashSecret"]; // Chuỗi bí mật
+                var vnpayData = Request.QueryString;
+                PayLib pay = new PayLib();
+
+                // Lấy toàn bộ dữ liệu được trả về
+                foreach (string s in vnpayData)
                 {
-                    string currentUserId = User.Identity.GetUserId();
-                    FoodcontextDB context = new FoodcontextDB();
-                    string voucherCode = Session["VoucherCode"] as string;
-                    double? totalpriceinvoucher = Session["TotalPriceAfterDiscount"] as double?;
-
-                    Order objOrder = new Order()
+                    if (!string.IsNullOrEmpty(s) && s.StartsWith("vnp_"))
                     {
-                        Od_name = currentUserId,
-                        Od_date = DateTime.Now,
-                        Od_note = null,
-                        Od_status = false,
-                        Od_address = null,
-                        VoidanOder = true,
-                        idthanhtoan = 2
-                    };
+                        pay.AddResponseData(s, vnpayData[s]);
+                    }
+                }
 
-                    context.Orders.Add(objOrder);
-                    context.SaveChanges();
+                long orderId = Convert.ToInt64(pay.GetResponseData("vnp_TxnRef")); // Mã hóa đơn
+                long vnpayTranId = Convert.ToInt64(pay.GetResponseData("vnp_TransactionNo")); // Mã giao dịch tại hệ thống VNPAY
+                string vnp_ResponseCode = pay.GetResponseData("vnp_ResponseCode"); // Response code: 00 - thành công, khác 00 - xem thêm https://sandbox.vnpayment.vn/apis/docs/bang-ma-loi/
+                string vnp_SecureHash = Request.QueryString["vnp_SecureHash"]; // Hash của dữ liệu trả về
 
-                    int newOrderNo = objOrder.Od_id;
+                bool checkSignature = pay.ValidateSignature(vnp_SecureHash, hashSecret); // Check chữ ký đúng hay không?
 
-                    List<listOrder> listOrders = getListOrder();
-                    List<Order_detail> orderDetails = new List<Order_detail>();
-                    bool insufficientStock = false;
-
-                    foreach (var order in listOrders)
+                if (checkSignature)
+                {
+                    using (FoodcontextDB context = new FoodcontextDB())
                     {
-                        var cart = context.CartItems.SingleOrDefault(x => x.Id == order.ID);
-                        if (cart != null)
+                        Order objOrder = context.Orders.SingleOrDefault(o => o.Od_id == orderId);
+                        if (objOrder != null)
                         {
-                            var product = context.Products.FirstOrDefault(p => p.Productid == cart.Product.Productid);
-                            if (product != null)
+                            if (vnp_ResponseCode == "00")
                             {
-                                if (cart.Quantity > product.Soluong)
-                                {
-                                    insufficientStock = true;
-                                    ViewBag.ErrorMessage = $"Sản phẩm {product.Productname} không đủ hàng.";
-                                    return RedirectToAction("HandleError");
-                                }
-
-                                Order_detail ctdh = new Order_detail()
-                                {
-                                    Od_id = newOrderNo,
-                                    Productid = cart.Product.Productid,
-                                    num = cart.Quantity,
-                                    tt_money = (double?)cart.Quantity * checkproduct(cart.Product),
-                                    price = checkproduct(cart.Product),
-                                    Storeid = cart.Product.Userid,
-                                    VoucherCode = Session["VoucherCode"] as string,
-                                    Totalinvoucher = Session["TotalPriceAfterDiscount"] as double?
-                                };
-
-                                if (ctdh.VoucherCode != null && ctdh.Totalinvoucher.HasValue &&
-                                    ctdh.VoucherCode == voucherCode && ctdh.Totalinvoucher == ctdh.Totalinvoucher)
-                                {
-                                    var discount = context.Discounts.SingleOrDefault(x => x.Code == voucherCode);
-                                    if (discount != null && (discount.SoLuong > 0 || discount.Status == true))
-                                    {
-                                        discount.SoLuong -= 1;
-                                        UpdateDiscountStatus(voucherCode);
-                                    }
-                                    else
-                                    {
-                                        ViewBag.ErrorMessage = "Voucher không tồn tại hoặc đã hết hạn";
-                                        return RedirectToAction("HandleError");
-                                    }
-                                }
-
-                                context.Order_detail.Add(ctdh);
-                                orderDetails.Add(ctdh);
-
-                                if (product != null)
-                                {
-                                    product.Soluong -= cart.Quantity;
-                                    context.SaveChanges();
-                                }
-
-                                context.CartItems.Remove(cart);
-                                context.SaveChanges();
+                                objOrder.Od_status = true; // Đã thanh toán thành công
                             }
+                            else
+                            {
+                                objOrder.Od_status = false; // Thanh toán không thành công
+                            }
+
+                            // Lưu trạng thái đơn hàng vào cơ sở dữ liệu
+                            context.SaveChanges();
+
+                            // Nếu bạn có thông tin chi tiết đơn hàng từ VNPAY, bạn có thể lưu vào bảng Order_detail tại đây
+                            // Đối với mỗi sản phẩm trong đơn hàng, tạo một bản ghi Order_detail và lưu vào cơ sở dữ liệu
+
+                            ViewBag.Message = "Đã xử lý thanh toán cho hóa đơn " + orderId + " | Mã giao dịch: " + vnpayTranId;
+                        }
+                        else
+                        {
+                            ViewBag.Message = "Không tìm thấy đơn hàng có mã " + orderId;
                         }
                     }
-
-                    string subject = "Order Confirmation";
-                    string body = $"Your order has been placed successfully.\n\nOrder ID: {newOrderNo}\nOrder Date: {objOrder.Od_date}\nItems:\n";
-
-                    foreach (var orderDetail in orderDetails)
-                    {
-                        body += $"\n  - Product ID: {orderDetail.Productid}\n    Price: ${orderDetail.price}\n    Quantity: {orderDetail.num}\n";
-                    }
-
-                    string toAddress = User.Identity.GetUserName();
-                    sendgmail(subject, body, toAddress);
                 }
-                catch (Exception ex)
+                else
                 {
-                    ViewBag.ErrorMessage = $"Có lỗi xảy ra trong quá trình xử lý: {ex.Message}";
-                    return RedirectToAction("HandleError");
+                    ViewBag.Message = "Có lỗi xảy ra trong quá trình xử lý";
                 }
+            }
 
-                return View();
-            }
-            else
-            {
-                ViewBag.Message = "Có lỗi xảy ra trong quá trình xử lý";
-                return View();
-            }
+            return View();
         }
-
 
     }
 
-}       
+
+}
+
