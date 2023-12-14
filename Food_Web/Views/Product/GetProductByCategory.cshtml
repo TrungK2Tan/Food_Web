@@ -193,11 +193,11 @@
                     <div class="row product-container list-style">
                         @foreach (var item in Model)
                         {
-                            <div class="product-item col-lg-4 col-md-6 col-sm-6">
+                            <div class="product-item col-lg-6 col-md-6 col-sm-6">
                                 <div class="item">
                                     <div class="image-container">
                                         <a class="item-img-wrapper-link" href="@Url.Action("Detail", "Home", new { id = item.Productid })">
-                                            <img class="img-fluid" src="~/Content/products/@item.image" alt="Product">
+                                            <img class="img-fluid product-image" src="~/Content/products/@item.image" alt="Product">
                                         </a>
                                         <div class="item-action-behaviors">
                                             <a class="item-quick-look" data-toggle="modal" href="#quick-view">Quick Look</a>
@@ -208,7 +208,6 @@
                                     </div>
                                     <div class="item-content">
                                         <div class="what-product-is">
-
                                             <h6 class="item-title">
                                                 <a href="single-product.html">@item.Productname</a>
                                             </h6>
@@ -382,13 +381,80 @@
         });
     });
 </script>
-
-
 <style>
+    .product-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
 
-    .col-lg-9.col-md-9.col-sm-12 {
-        margin-top: -10px;
-        padding-left: 36px;
+    .product-item {
+        width: calc(33.333% - 20px);
+        margin-bottom: 20px;
+        box-sizing: border-box;
+    }
+
+    .image-container {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .item-img-wrapper-link {
+        display: block;
+        width: 100%;
+        height: 0;
+        padding-bottom: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0;
+        left: 0;
+        transition: transform 0.3s ease; /* Thêm hiệu ứng transition cho hình ảnh */
+    }
+
+    .item:hover .product-image {
+        transform: scale(1.1); /* Hiệu ứng khi hover */
+    }
+
+    .item-action-behaviors {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        box-sizing: border-box;
+        transition: background 0.3s;
+    }
+
+    .item:hover .item-action-behaviors {
+        background: rgba(255, 255, 255, 1);
+    }
+
+    .item-action-behaviors a {
+        display: block;
+        margin-bottom: 5px;
+        text-align: center;
+        color: #333;
+        text-decoration: none;
+    }
+
+    .item-content {
+        padding: 10px;
+    }
+
+    .item-description {
+        max-height: 100px;
+        overflow: hidden;
+    }
+
+    .price-template {
+        margin-top: 10px;
     }
 </style>
-

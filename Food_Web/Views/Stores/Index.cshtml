@@ -78,7 +78,7 @@
                             <div class="image-container">
                                 <a href="@Url.Action("StoreProducts", "Stores", new { id = item.Id })">
 
-                                    <img src="~/Content/products/@item.image">
+                                    <img class="img-fluid product-image" src="~/Content/products/@item.image">
 
                                     <div src="~/Content/products/@item.image" class="team-img back-img">
                                         <div class="overlay">
@@ -92,7 +92,7 @@
                                 <div class="what-product-is">
 
                                     <h6 class="item-title">
-                                        <a @Url.Action("StoreProducts", "Stores", new { id = item.Id }) /a>
+                                        <a @Url.Action("StoreProducts", "Stores", new { id = item.Id })> </a>
                                     </h6>
                                     <div class="item-stars">
                                         <div class='star' title="0 out of 5 - based on 0 Reviews">
@@ -129,7 +129,7 @@
                             <div class="image-container">
                                 <a href="@Url.Action("StoreProducts", "Stores", new { id = item.Id })" class="disabled-link">
 
-                                    <img src="~/Content/products/@item.image">
+                                    <img class="img-fluid product-image" src="~/Content/products/@item.image">
 
                                     <div src="~/Content/products/@item.image" class="team-img back-img">
                                         <div class="overlay">
@@ -216,6 +216,11 @@
     </div>
 </div>
 <style>
+    .product-image {
+        width: 253px;
+        height: 253px;
+        object-fit: cover;
+    }
     .disabled-link {
         pointer-events: none;
         opacity: 0.5;
