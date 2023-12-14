@@ -4705,6 +4705,7 @@
     <Content Include="Views\Order_detail\GetOrderDetail.cshtml" />
     <Content Include="Views\Discountss\NewDiscounts.cshtml" />
     <Content Include="Views\Product\Showgiamgia.cshtml" />
+    <Content Include="Views\ShoppingCart\PaymentVNPayConfirm.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

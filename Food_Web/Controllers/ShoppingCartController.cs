@@ -497,7 +497,6 @@ namespace Food_Web.Models
             double? totalpriceinvoucher = Session["TotalPriceAfterDiscount"] as double?;
             double originalAmount = 0;
 
-
             int newOrderNo = context.Orders.Max(o => (int?)o.Od_id) ?? 0;
             newOrderNo++;
 
@@ -511,6 +510,7 @@ namespace Food_Web.Models
                 VoidanOder = true,
                 idthanhtoan = 1
             };
+
 
             context.Orders.Add(objOrder);
             string oderid = newOrderNo.ToString();
@@ -533,6 +533,7 @@ namespace Food_Web.Models
                             // Redirect to some action to handle the error and display the message
                             return RedirectToAction("HandleError");
                         }
+
                         // Tạo chi tiết đơn hàng và lưu vào cơ sở dữ liệu
                         Order_detail ctdh = new Order_detail()
                         {
@@ -545,6 +546,7 @@ namespace Food_Web.Models
                             VoucherCode = voucherCode,
                             Totalinvoucher = totalpriceinvoucher
                         };
+
                         if (voucherCode != null && totalpriceinvoucher.HasValue && voucherCode == ctdh.VoucherCode && totalpriceinvoucher == ctdh.Totalinvoucher)
                         {
                             var discount = context.Discounts.SingleOrDefault(x => x.Code == voucherCode);
@@ -558,21 +560,19 @@ namespace Food_Web.Models
                                 string code = " Voucher không tồn tại hoặc hết hạn";
                             }
                         }
-                        //context.Order_detail.Add(ctdh);
-                        //orderDetails.Add(ctdh);
-
-
 
                         // Trừ đi số lượng đã mua từ sản phẩm
                         if (product != null)
                         {
                             product.Soluong -= cart.Quantity; // Giả sử Soluong là số lượng sản phẩm
-                            //context.SaveChanges(); // Lưu thay đổi số lượng vào cơ sở dữ liệu
+                                                              //context.SaveChanges(); // Lưu thay đổi số lượng vào cơ sở dữ liệu
                         }
 
                         context.CartItems.Remove(cart);
                         // context.SaveChanges();
 
+                        // Add to the total amount
+                        tt_money += ctdh.tt_money;
                     }
                 }
             }
@@ -590,22 +590,22 @@ namespace Food_Web.Models
             //string orderid = DateTime.Now.Ticks.ToString(); //mã đơn hàng
 
 
-            string amount = (tt_money + 1000).ToString();
-            string orderid = newOrderNo+"";
+            string amount = tt_money.ToString();
+            string orderid = newOrderNo+""; //mã đơn hàng
             string requestId = DateTime.Now.Ticks.ToString();
             string extraData = "";
 
             //Before sign HMAC SHA256 signature
             string rawHash = "partnerCode=" +
-                partnerCode + "&accessKey=" +
-                accessKey + "&requestId=" +
-                requestId + "&amount=" +
-                amount + "&orderId=" +
-                orderid + "&orderInfo=" +
-                orderInfo + "&returnUrl=" +
-                returnUrl + "&notifyUrl=" +
-                notifyurl + "&extraData=" +
-                extraData;
+                 partnerCode + "&accessKey=" +
+                 accessKey + "&requestId=" +
+                 requestId + "&amount=" +
+                 amount + "&orderId=" +
+                 orderid + "&orderInfo=" +
+                 orderInfo + "&returnUrl=" +
+                 returnUrl + "&notifyUrl=" +
+                 notifyurl + "&extraData=" +
+                 extraData;
 
             MoMoSecurity crypto = new MoMoSecurity();
             //sign signature SHA256
@@ -613,23 +613,21 @@ namespace Food_Web.Models
 
             //build body json request
             JObject message = new JObject
-            {
-                { "partnerCode", partnerCode },
-                { "accessKey", accessKey },
-                { "requestId", requestId },
-                { "amount", amount },
-                { "orderId", orderid },
-                { "orderInfo", orderInfo },
-                { "returnUrl", returnUrl },
-                { "notifyUrl", notifyurl },
-                { "extraData", extraData },
-                { "requestType", "captureMoMoWallet" },
-                { "signature", signature }
-
-            };
+    {
+        { "partnerCode", partnerCode },
+        { "accessKey", accessKey },
+        { "requestId", requestId },
+        { "amount", amount },
+        { "orderId", orderid },
+        { "orderInfo", orderInfo },
+        { "returnUrl", returnUrl },
+        { "notifyUrl", notifyurl },
+        { "extraData", extraData },
+        { "requestType", "captureMoMoWallet" },
+        { "signature", signature }
+    };
 
             string responseFromMomo = PaymentRequest.sendPaymentRequest(endpoint, message.ToString());
-
             JObject jmessage = JObject.Parse(responseFromMomo);
 
             return Redirect(jmessage.GetValue("payUrl").ToString());
@@ -720,114 +718,123 @@ namespace Food_Web.Models
             if (result != null && result.errorCode == "0")
             {
                 bool insufficientStock = false;
-                List<Order_detail> orderDetails = new List<Order_detail>(); // Tạo danh sách để lưu thông tin chi tiết đơn hàng
+                List<Order_detail> orderDetails = new List<Order_detail>();
                 string voucherCode = Session["VoucherCode"] as string;
                 double? totalpriceinvoucher = Session["TotalPriceAfterDiscount"] as double?;
-                string currentUserId = User.Identity.GetUserId(); // Lấy thông tin đăng nhập
+                string currentUserId = User.Identity.GetUserId();
                 FoodcontextDB context = new FoodcontextDB();
 
-                try
+                using (var transaction = context.Database.BeginTransaction())
                 {
-
-                    Order objOrder = new Order()
+                    try
                     {
-                        Od_name = currentUserId,
-                        Od_date = DateTime.Now,
-                        Od_note = null,
-                        Od_status = false,
-                        Od_address = null,
-                        VoidanOder = true,
-                        idthanhtoan = 2
-
-                    };
-
-                    //context.Orders.Add(objOrder);
-                    //context.SaveChanges();
-
-                    int newOrderNo = objOrder.Od_id; // Giả sử bảng Order có cột "Id" đại diện cho số đơn hàng
-
-                    List<listOrder> listOrders = getListOrder();
-
-                    foreach (var order in listOrders)
-                    {
-                        var cart = context.CartItems.SingleOrDefault(x => x.Id == order.ID);
-                        if (cart != null)
+                        Order objOrder = new Order()
                         {
-                            var product = context.Products.FirstOrDefault(p => p.Productid == cart.Product.Productid);
-                            if (product != null)
-                            {
-                                if (cart.Quantity > product.Soluong)
-                                {
-                                    insufficientStock = true;
-                                    ViewBag.ErrorMessage = "Sản phẩm " + product.Productname + " không đủ hàng.";
-                                    // Redirect to some action to handle the error and display the message
-                                    return RedirectToAction("HandleError");
-                                }
-                                // Tạo chi tiết đơn hàng và lưu vào cơ sở dữ liệu
-                                Order_detail ctdh = new Order_detail()
-                                {
-                                    Od_id = newOrderNo,
-                                    Productid = cart.Product.Productid,
-                                    num = cart.Quantity,
-                                    tt_money = (double?)cart.Quantity * checkproduct(cart.Product),
-                                    price = checkproduct(cart.Product),
-                                    Storeid = cart.Product.Userid,
-                                    VoucherCode = voucherCode,
-                                    Totalinvoucher = totalpriceinvoucher
-                                };
-                                if (voucherCode != null && totalpriceinvoucher.HasValue && voucherCode == ctdh.VoucherCode && totalpriceinvoucher == ctdh.Totalinvoucher)
-                                {
-                                    var discount = context.Discounts.SingleOrDefault(x => x.Code == voucherCode);
-                                    if (discount != null && discount.SoLuong > 0 || discount.Status == true)
-                                    {
-                                        discount.SoLuong -= 1;
-                                        UpdateDiscountStatus(voucherCode);
-                                    }
-                                    else
-                                    {
-                                        string code = " Voucher không tồn tại hoặc hết hạn";
-                                    }
-                                }
-                                context.Order_detail.Add(ctdh);
-                                orderDetails.Add(ctdh);
+                            Od_name = currentUserId,
+                            Od_date = DateTime.Now,
+                            Od_note = null,
+                            Od_status = false,
+                            Od_address = null,
+                            VoidanOder = true,
+                            idthanhtoan = 2
+                        };
 
-                                // Trừ đi số lượng đã mua từ sản phẩm
+                        context.Orders.Add(objOrder);
+                        context.SaveChanges();
+
+                        int newOrderNo = objOrder.Od_id;
+
+                        List<listOrder> listOrders = getListOrder();
+
+                        foreach (var order in listOrders)
+                        {
+                            var cart = context.CartItems.SingleOrDefault(x => x.Id == order.ID);
+                            if (cart != null)
+                            {
+                                var product = context.Products.FirstOrDefault(p => p.Productid == cart.Product.Productid);
                                 if (product != null)
                                 {
-                                    product.Soluong -= cart.Quantity; // Giả sử Soluong là số lượng sản phẩm
-                                    context.SaveChanges(); // Lưu thay đổi số lượng vào cơ sở dữ liệu
+                                    if (cart.Quantity > product.Soluong)
+                                    {
+                                        insufficientStock = true;
+                                        ViewBag.ErrorMessage = "Sản phẩm " + product.Productname + " không đủ hàng.";
+                                        return RedirectToAction("HandleError");
+                                    }
+
+                                    Order_detail ctdh = new Order_detail()
+                                    {
+                                        Od_id = newOrderNo,
+                                        Productid = cart.Product.Productid,
+                                        num = cart.Quantity,
+                                        tt_money = (double?)cart.Quantity * checkproduct(cart.Product),
+                                        price = checkproduct(cart.Product),
+                                        Storeid = cart.Product.Userid,
+                                        VoucherCode = voucherCode,
+                                        Totalinvoucher = totalpriceinvoucher
+                                    };
+
+                                    if (voucherCode != null && totalpriceinvoucher.HasValue && voucherCode == ctdh.VoucherCode && totalpriceinvoucher == ctdh.Totalinvoucher)
+                                    {
+                                        var discount = context.Discounts.SingleOrDefault(x => x.Code == voucherCode);
+                                        if (discount != null && discount.SoLuong > 0 || discount.Status == true)
+                                        {
+                                            discount.SoLuong -= 1;
+                                            UpdateDiscountStatus(voucherCode);
+                                        }
+                                        else
+                                        {
+                                            string code = " Voucher không tồn tại hoặc hết hạn";
+                                        }
+                                    }
+
+                                    context.Order_detail.Add(ctdh);
+                                    orderDetails.Add(ctdh);
+
+                                    if (product != null)
+                                    {
+                                        product.Soluong -= cart.Quantity;
+                                        context.SaveChanges();
+                                    }
+
+                                    context.CartItems.Remove(cart);
+                                    context.SaveChanges();
                                 }
-
-                                context.CartItems.Remove(cart);
-                                context.SaveChanges();
-
                             }
                         }
-                    }
-                    string subject = "Order Confirmation";
-                    string body = "Your order has been placed successfully.\n\n";
-                    body += "Order ID: " + newOrderNo + "\n";
-                    body += "Order Date: " + objOrder.Od_date + "\n";
-                    body += "Items:\n";
-                    foreach (var orderDetail in orderDetails)
-                    {
-                        body += "\n  - Product ID: " + orderDetail.Productid + "\n";
-                        body += "    Price: $" + orderDetail.price + "\n";
-                        body += "    Quantity: " + orderDetail.num + "\n";
-                    }
-                    string toAddress = User.Identity.GetUserName(); // Get the user's email
 
-                    sendgmail(subject, body, toAddress);
+                        transaction.Commit();
+
+                        string subject = "Order Confirmation";
+                        string body = "Your order has been placed successfully.\n\n";
+                        body += "Order ID: " + newOrderNo + "\n";
+                        body += "Order Date: " + objOrder.Od_date + "\n";
+                        body += "Items:\n";
+                        foreach (var orderDetail in orderDetails)
+                        {
+                            body += "\n  - Product ID: " + orderDetail.Productid + "\n";
+                            body += "    Price: $" + orderDetail.price + "\n";
+                            body += "    Quantity: " + orderDetail.num + "\n";
+                        }
+                        string toAddress = User.Identity.GetUserName();
+
+                        sendgmail(subject, body, toAddress);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        // Handle the exception, possibly log it
+                        // Redirect to an error page or display an error message
+                        ViewBag.ErrorMessage = "An error occurred while processing the order.";
+                        return RedirectToAction("HandleError");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    //transaction.Rollback();
-                }
+
                 getListOrder().Clear();
             }
 
             return View();
         }
+
         public List<listOrder> getListOrder()
         {
             var listOrders = Session["listOrder"] as List<listOrder>;
