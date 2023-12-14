@@ -1,0 +1,61 @@
+﻿@model IEnumerable<Food_Web.Models.Product>
+
+    @{
+        ViewBag.Title = "Indextl";
+        Layout = "~/Views/Shared/_LayoutStore.cshtml";
+    }
+
+    @using (Html.BeginForm("Indextl", "Productss", FormMethod.Get))
+    {
+        <div class="form-group">
+            @Html.Label("Select Category:")
+            @Html.DropDownList("categoryId", ViewBag.CategoryId as SelectList, "All", new { @class = "form-control" })
+        </div>
+        <button type="submit" class="btn btn-primary" id="filterButton">Filter</button>
+    }
+    @Html.ActionLink("Export to Excel", "Exporttl", new { categoryId = ViewBag.CategoryId }, new { @class = "btn btn-primary" })
+
+    <table class="table" id="productTable">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category.Categoryname)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Productname)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Soluong)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.price)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.image)
+                </td>
+            </tr>
+        }
+    </table>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+        $("#CategoryDropdown").on("change", function () {
+            var selectedCategoryId = $(this).val();
+
+            $.ajax({
+                url: "@Url.Action("Indextl", "Productss")",
+                data: { categoryId: selectedCategoryId },
+                type: "GET",
+                success: function (data) {
+                    $("#productList").html(data);
+                },
+                error: function () {
+                    alert("An error occurred while filtering products.");
+                }
+            });
+        });
+    });
+
+    </script>

@@ -1,0 +1,93 @@
+﻿@*@model IEnumerable<Food_Web.Models.Product>*@
+@using PagedList.Mvc
+
+@model PagedList.IPagedList<Food_Web.Models.Product>
+@{
+    ViewBag.Title = "Sphomnay";
+    Layout = "~/Views/Shared/_Layout.cshtml"; ;
+}
+
+<div class="page-deal u-s-p-t-80">
+    <div class="container">
+        <!-- Page-Bar -->
+        <div class="page-bar clearfix">
+
+        </div>
+        <!-- Page-Bar /- -->
+        <!-- Row-of-Product-Container -->
+        <div class="row product-container grid-style">
+
+            @foreach (var item in Model)
+            {
+                <div class="product-item col-lg-3 col-md-6 col-sm-6">
+                    <div class="item">
+                        <div class="image-container">
+                            <a class="item-img-wrapper-link" href="single-product.html">
+                                @*<img class="img-fluid" src="images/product/product@3x.jpg" alt="Product">*@
+                                <img class="img-fluid product-image" src="~/Content/products/@item.image" style="width: 250px;">
+                            </a>
+                            <div class="item-action-behaviors">
+                                <a class="item-quick-look" data-toggle="modal" href="#quick-view">Quick Look</a>
+                                <a class="item-mail" href="javascript:void(0)">Mail</a>
+                                <a class="item-addwishlist" href="javascript:void(0)">Add to Wishlist</a>
+                                <a class="item-addCart" href="javascript:void(0)">Add to Cart</a>
+                            </div>
+                        </div>
+                        <div class="item-content">
+                            <div class="what-product-is">
+                                <ul class="bread-crumb">
+                                    <li class="has-separator">
+                                        <a href="shop-v1-root-category.html">Men's</a>
+                                    </li>
+                                    <li class="has-separator">
+                                        <a href="shop-v2-sub-category.html">Tops</a>
+                                    </li>
+                                    <li>
+                                        <a href="shop-v3-sub-sub-category.html">Hoodies</a>
+                                    </li>
+                                </ul>
+                                <h6 class="item-title">
+                                    <a href="single-product.html">@item.Productname</a>
+                                </h6>
+                                <div class="item-description">
+                                    <p>
+                                        This hoodie is full cotton. It includes a muff sewn onto the lower front, and (usually) a drawstring to adjust the hood opening. Throughout the U.S., it is common for middle-school, high-school, and college students to wear this sweatshirts—with or without hoods—that display their respective school names or mascots across the chest, either as part of a uniform or personal preference.
+                                    </p>
+                                </div>
+                                <div class="item-stars">
+                                    <div class='star' title="4.5 out of 5 - based on 23 Reviews">
+                                        <span style='width:67px'></span>
+                                    </div>
+                                    <span>(23)</span>
+                                </div>
+                            </div>
+                            <div class="price-template">
+                                <div class="item-new-price">
+                                    $55.00
+                                </div>
+                                <div class="item-old-price">
+                                    $60.00
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tag new">
+                            <span>NEW</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            <div class="pagination">
+                Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+                @Html.PagedListPager(Model, page => Url.Action("Sphomnay", new { page }))
+            </div>
+            @*</div>*@
+        </div>
+    </div>
+</div>
+<style>
+    .product-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* Choose "cover", "contain", "fill", or "scale-down" based on your preference */
+    }
+</style>

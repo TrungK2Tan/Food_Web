@@ -1,0 +1,166 @@
+﻿@model IEnumerable<Food_Web.Models.Blog>
+
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+}
+@*<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <div class="swiper-container">
+        <div class="swiper-wrapper">
+            @foreach (var item in Model)
+            {
+                <div class="swiper-slide">
+                    <div class="blog-box">
+                        <div class="blog-img back-img"
+                             style="background-image: url('../../content/images/blog/@item.image');"></div>
+                        <div class="blog-text">
+                            <p class="blog-date">@item.Blogday</p>
+                            <a href="#" class="h4-title">@item.Blogshort</a>
+                            <p>@item.Bloglong</p>
+                            <a href="#" class="sec-btn" data-url="@Url.Action("Details", "Blog", new { id = item.Blogid })">Read More</a>
+
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+    </div>
+    <script>
+        var mySwiper = new Swiper('.swiper-container', {
+            slidesPerView: 2,
+            spaceBetween: 30,
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+        });
+    </script>*@
+
+<div class="page-style-a">
+    <div class="container">
+        <div class="page-intro">
+            <h2>Blog</h2>
+            <ul class="bread-crumb">
+                <li class="has-separator">
+                    <i class="ion ion-md-home"></i>
+                    <a href="home.html">Home</a>
+                </li>
+                <li class="is-marked">
+                    <a href="blog.html">Blog</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- Page Introduction Wrapper /- -->
+<!-- Blog-Page -->
+<div class="page-blog u-s-p-t-80">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-9 col-md-9">
+                @foreach (var item in Model)
+                {
+                    <!-- Blog-Posts -->
+                    <div class="blog-post u-s-m-b-80">
+                        <div class="blog-post-wrapper u-s-m-b-26">
+                            <a class="blog-post-anchor" href="blog-detail.html">
+                                <img class="img-fluid" src="~/Content/images/blog/@item.image" alt="Blog post 1">
+                            </a>
+                        </div>
+                        <h1 class="blog-post-heading u-s-m-b-13">
+                            <a href="blog-detail.html">@item.Blogshort</a>
+                        </h1>
+                        <div class="blog-post-info u-s-m-b-13">
+                            <span class="blog-post-preposition">By</span>
+                            <a class="blog-post-author-name" href="blog-detail.html">Admin</a>
+                            <span class="blog-post-info-separator">/</span>
+                            <a class="blog-post-comment" href="blog-detail.html">Comments (6)</a>
+                            <span class="blog-post-info-separator">/</span>
+                            <span class="blog-post-published-date">
+                                <span>@item.Blogday</span>/
+
+                            </span>
+                        </div>
+                        <p class="blog-post-paragraph u-s-m-b-16">
+                            @item.Bloglong
+                        </p>
+                        <a href="blog-detail.html" class="blog-post-read-more">Read More</a>
+                    </div>
+                }
+                <!-- Blog-Posts-Pagination -->
+                <div class="blog-pagination u-s-m-b-80">
+                    <ul class="blog-pg-list">
+                        <li>
+                            <a href="blog.html" class="bl-pg-link d-none">Back</a>
+                        </li>
+                        <li>
+                            <a href="blog.html" class="bl-pg-link bl-pg-link-hover-a bl-pg-link-is-active">1</a>
+                        </li>
+                        <li>
+                            <a href="blog.html" class="bl-pg-link bl-pg-link-hover-a">2</a>
+                        </li>
+                        <li>
+                            <a href="blog.html" class="bl-pg-link bl-pg-link-hover-a">3</a>
+                        </li>
+                        <li>
+                            <a href="blog.html" class="bl-pg-link bl-pg-link-hover-gap">......</a>
+                        </li>
+                        <li>
+                            <a href="blog.html" class="bl-pg-link bl-pg-link-hover-a">4</a>
+                        </li>
+                        <li>
+                            <a href="blog.html" class="bl-pg-link bl-pg-link-hover-b">Previous</a>
+                        </li>
+                    </ul>
+                </div>
+                <!-- Blog-Posts-Pagination /- -->
+            </div>
+            <div class="col-lg-3 col-md-3">
+                <!-- Blog-Sidebar-Search -->
+                <div class="bl-sidebar-widget u-s-m-b-50">
+                    <h3 class="bl-sidebar-title-h3 u-s-m-b-20">Search</h3>
+                    <form class="group-text-blog-search">
+                        <label class="sr-only" for="blog-search">Search On Blog</label>
+                        <input type="text" id="blog-search" class="text-field" placeholder="Type to search">
+                        <button type="submit" class="button fas fa-search"></button>
+                    </form>
+                </div>
+                <!-- Blog-Sidebar-Search /- -->
+                <!-- Blog-Sidebar-Category -->
+                <div class="bl-sidebar u-s-m-b-50">
+                    <h3 class="bl-sidebar-title-h3 u-s-m-b-20">Categories</h3>
+                    <ul class="bl-sidebar-list">
+                        <li>
+                            <a href="blog.html">Corporate</a>
+                        </li>
+                        <li>
+                            <a href="blog.html">Creative</a>
+                        </li>
+                        <li>
+                            <a href="blog.html">Design</a>
+                        </li>
+                        <li>
+                            <a href="blog.html">News</a>
+                        </li>
+                        <li>
+                            <a href="blog.html">Photography</a>
+                        </li>
+                    </ul>
+                </div>
+               
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bl-sidebar-widget.u-s-m-b-50 {
+        margin-top: -3287px;
+       
+    }
+</style>

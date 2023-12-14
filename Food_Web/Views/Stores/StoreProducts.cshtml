@@ -1,0 +1,368 @@
+﻿
+<body>
+
+    <div class="page-style-a">
+        <div class="container">
+            <div class="page-intro">
+                <h2>Shop</h2>
+                <button id="chatButton">Chat</button>
+                <ul class="bread-crumb">
+                    <li class="has-separator">
+                        <i class="ion ion-md-home"></i>
+                        <a href="home.html">Home</a>
+                    </li>
+                    <li class="is-marked">
+                        <a href="custom-deal-page.html">shop</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <section class="py-5">
+        @*<div class="banner-layer">
+                <div class="container">
+                    <div class="image-banner">
+                        <a href="shop-v1-root-category.html" class="mx-auto banner-hover effect-dark-opacity">
+                            <img class="img-fluid"  src="~/Content/vocher.png"  alt="Winter Season Banner">
+                        </a>
+                    </div>
+                </div>
+            </div>*@
+
+        <section class="section-maker">
+            <div class="container">
+                <div class="sec-maker-header text-center">
+                    <div class="sec-maker-header text-center">
+
+                        <ul class="nav tab-nav-style-1-a justify-content-center">
+                            <li class="nav-item">
+                                <a class="nav-link active" data-toggle="tab" href="#men-latest-products" id="btnAllProducts">Latest Products</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#men-best-selling-products" id="btnBestSell">Sale</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#men-top-rating-products" id="btnhot">Top Rating</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" data-toggle="tab" href="#men-featured-products">Featured Products</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="wrapper-content">
+                        <div class="tab-pane fade active show" id="men-latest-products">
+                            <div class="row product-container grid-style">
+                                @foreach (var item in Model)
+                                {
+                                    <div class="product-item col-lg-3 col-md-6 col-sm-6">
+                                        <div class="item">
+                                            <div class="image-container">
+                                                <a class="item-img-wrapper-link" href="@Url.Action("Detail", "Home", new { id = item.Productid })">
+                                                    <img class="img-fluid" src="~/Content/products/@item.image" alt="Product">
+                                                </a>
+                                                <div class="item-action-behaviors">
+                                                    <a class="item-quick-look" data-toggle="modal" href="#quick-view">Quick Look</a>
+                                                    <a class="item-mail" href="javascript:void(0)">Mail</a>
+                                                    <a class="item-addwishlist" href="javascript:void(0)" data-id="@item.Productid">Add to Wishlist</a>
+                                                    <a class="item-addCart" href="javascript:void(0)" data-id="@item.Productid">Add to Cart</a>
+                                                </div>
+                                            </div>
+                                            <div class="item-content">
+                                                <div class="what-product-is">
+                                                    <ul class="bread-crumb">
+                                                        <li class="has-separator">
+                                                            <a href="shop-v1-root-category.html">home</a>
+                                                        </li>
+                                                        <li class="has-separator">
+                                                            <a href="shop-v2-sub-category.html">Ten shop</a>
+                                                        </li>
+                                                        <li>
+                                                            <a href="shop-v3-sub-sub-category.html">the loai</a>
+                                                        </li>
+                                                    </ul>
+                                                    @*<h6 class="item-title">
+                                                        <a href="single-product.html" style=" word-wrap: break-word; white-space: pre-line;">@item.Productname</a>
+                                                    </h6>*@
+                                                    <h6 class="item-title">
+                                                        <a href="single-product.html" style="display: block; word-wrap: break-word; white-space: pre-line;">@item.Productname</a>
+                                                    </h6>
+
+                                                    <div class="item-stars">
+                                                        <div class='star' title="0 out of 5 - based on 0 Reviews">
+                                                            <span style='width:0'></span>
+                                                        </div>
+                                                        <span>(0)</span>
+                                                    </div>
+                                                </div>
+                                                <div class="price-template">
+                                                    @if (item.DiscountPercent > 0)
+                                                    {
+                                                        <div class="item-new-price">
+                                                            @item.DiscountedPrice
+                                                        </div>
+                                                        <div class="item-old-price">
+                                                            @item.price
+                                                        </div>
+                                                        <div class="tag new">
+                                                            <span>Sale @item.DiscountPercent</span>
+                                                        </div>
+
+                                                    }
+                                                    else if (item.DiscountPercent == null)
+                                                    {
+                                                        if (item.is_hot == true)
+                                                        {
+                                                            <div class="item-new-price">
+                                                                @item.price
+                                                            </div>
+                                                            <div class="tag new">
+                                                                <span>Hot</span>
+                                                            </div>
+
+                                                        }
+                                                        <div class="item-new-price">
+                                                            @item.price
+                                                        </div>
+                                                        <div class="tag new">
+                                                            <span>new</span>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                }
+
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="men-best-selling-products">
+                            <div>@Html.Action("Sale1", "Stores")</div>
+                        </div>
+                        <div class="tab-pane fade" id="men-top-rating-products">
+                            <div>@Html.Action("HotProducts", "Stores")</div>
+                        </div>
+                    </div>
+                </div>
+                <!--<form method="post" action="/Stores/Create">
+        @Html.AntiForgeryToken()
+
+        <div class="form-group">
+            <label for="content">Comment</label>
+            <textarea id="content" name="content" class="form-control" placeholder="Enter your comment"></textarea>
+        </div>-->
+                @*<div class="form-group">
+            <label for="Rating">Rating</label>
+            <input type="text" id="Rating" name="Rating" class="form-control" />
+        </div>*@
+                <!--<div class="form-group">
+            <label for="rating">Rating</label>
+            <div class="rating">
+                <input type="radio" id="star5" name="rating" value="5" />
+                <label for="star5"></label>
+                <input type="radio" id="star4" name="rating" value="4" />
+                <label for="star4"></label>
+                <input type="radio" id="star3" name="rating" value="3" />
+                <label for="star3"></label>
+                <input type="radio" id="star2" name="rating" value="2" />
+                <label for="star2"></label>
+                <input type="radio" id="star1" name="rating" value="1" />
+                <label for="star1"></label>
+            </div>
+        </div>
+        <div class="form-group" style="display: none;">
+            <label for="storeId">Store ID</label>
+            <input type="text" id="storeId" name="storeId" class="form-control" value="@ViewBag.userId" />
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Comment</button>
+    </form>-->
+                <form method="post" action="/Stores/Create" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+
+                    <div class="form-group">
+                        <label for="content">Comment</label>
+                        <textarea id="content" name="content" class="form-control" placeholder="Enter your comment"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="rating">Rating</label>
+                        <div class="rating">
+                            <input type="radio" id="star5" name="rating" value="5" />
+                            <label for="star5"></label>
+                            <input type="radio" id="star4" name="rating" value="4" />
+                            <label for="star4"></label>
+                            <input type="radio" id="star3" name="rating" value="3" />
+                            <label for="star3"></label>
+                            <input type="radio" id="star2" name="rating" value="2" />
+                            <label for="star2"></label>
+                            <input type="radio" id="star1" name="rating" value="1" />
+                            <label for="star1"></label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image">Upload Image</label>
+                        <input type="file" id="image" name="image" accept=".png, .jpg, .jpeg" />
+                    </div>
+
+                    <div class="form-group" style="display: none;">
+                        <label for="storeId">Store ID</label>
+                        <input type="text" id="storeId" name="storeId" class="form-control" value="@ViewBag.userId" />
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Submit Comment</button>
+                </form>
+
+                @Html.Action("ShowComment", "Stores")
+
+            </div>
+        </section>
+
+
+
+    </section>
+    <!-- Footer-->
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Core theme JS-->
+    <script src="~/Content/js/scripts.js"></script>
+</body>
+</html>
+<style>
+    .price-container {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .discounted-price {
+        color: red;
+        font-size: 1.5em;
+        font-weight: bold;
+        margin-right: 10px;
+    }
+
+    .original-price {
+        color: #999;
+        font-size: 1em;
+        text-decoration: line-through;
+    }
+
+    .price {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+
+    .rating {
+        display: inline-block;
+        font-size: 0;
+    }
+
+        .rating input {
+            display: none;
+        }
+
+        .rating label {
+            position: relative;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+        }
+
+            .rating label:before {
+                content: "\2605";
+                position: absolute;
+                top: 0;
+                left: 0;
+                font-size: 20px;
+                line-height: 20px;
+                color: #ddd;
+            }
+
+            .rating label:hover:before,
+            .rating label:hover ~ label:before,
+            .rating input:checked ~ label:before {
+                color: #ffba00;
+            }
+</style>
+
+<script>
+
+    const chatButton = document.getElementById('chatButton');
+
+    chatButton.addEventListener('click', () => {
+        // Chuyển hướng người dùng đến controller chat của sản phẩm
+        window.location.href = '/Stores/Indexchat';  // Điều chỉnh đường dẫn tùy theo tên controller của bạn
+    });
+
+    var i = 0;
+    $(document).on('click', '.btn', function () {
+        var ProductID = $(this).data("id");
+        alert(ProductID);
+        $.ajax({
+            url: '/ShoppingCart/AddToCart',
+            type: 'POST',
+            data: { "id": ProductID },
+            success: function (result) {
+                console.log('main' + i++);
+                swal({
+                    title: "Good job!",
+                    text: "You clicked the button!",
+                    icon: "success",
+                });
+            },
+            error: function (err) {
+                alert(err.statusText);
+            }
+        });
+    });
+
+
+    // Lắng nghe sự kiện khi click vào tab
+    document.addEventListener('DOMContentLoaded', function () {
+        var tabs = document.querySelectorAll('.nav-link');
+
+        for (var i = 0; i < tabs.length; i++) {
+            tabs[i].addEventListener('click', function (event) {
+                event.preventDefault();
+
+                var targetTab = event.target.getAttribute('href');
+
+                // Ẩn tất cả các tab-pane
+                var tabPanes = document.querySelectorAll('.tab-pane');
+                for (var j = 0; j < tabPanes.length; j++) {
+                    tabPanes[j].classList.remove('active');
+                }
+
+                // Hiển thị tab-pane được chọn
+                document.querySelector(targetTab).classList.add('active');
+            });
+        }
+    });
+
+    $(document).ready(function () {
+        $("#view-more-btn").click(function () {
+
+            $("#more-comments").show();
+            $(this).hide();
+        });
+    });
+</script>
+
+<style>
+    /* Ẩn tất cả các tab-pane */
+    .tab-pane {
+        display: none;
+    }
+
+        /* Hiển thị tab-pane active */
+        .tab-pane.active {
+            display: block;
+        }
+</style>
